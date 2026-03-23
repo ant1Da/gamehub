@@ -29,7 +29,7 @@ if (isset($_POST["login"], $_POST["email"], $_POST["password"], $_POST["confirm_
                     echo "Les mots de passe ne correspondent pas";
                 } else {
                     echo "Inscription valide !";
-                }
+                } 
                 }
             }
         }
