@@ -1,38 +1,47 @@
 <?php
-
-if (isset($_POST["login"], $_POST["email"], $_POST["password"], $_POST["confirm_password"])) {
-
-    $login = $_POST["login"];
-    $email = $_POST["email"];
-    $password = $_POST["password"];
-    $confirm_password = $_POST["confirm_password"];
-
-    if (empty($login) || empty($email) || empty($password) || empty($confirm_password)) {
-        echo "Veuillez remplir tous les champs.";
+session_start();
+ 
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $identifier = $_POST['identifier'] ?? '';
+    $password   = $_POST['password']   ?? '';
+ 
+    $errors = [];
+ 
+    // 1. Vérifier que les champs sont remplis
+    if (empty($identifier)) {
+        $errors[] = "Veuillez entrer votre login ou email.";
     }
-
-    $loginPattern = "/^[a-zA-Z0-9]{4,}$/";
-
-    if (!preg_match($loginPattern, $login)) {
-        echo "Login invalide (Lettres et chiffres uniquement, minimum 4 caractères";
+    if (empty($password)) {
+        $errors[] = "Veuillez entrer votre mot de passe.";
     }
-
-    $emailPattern = "/^[^@\s]+@[^@\s]+\.[^@\s]+$/";
-
-    if (!preg_match($emailPattern,$email)) {
-        echo "E-Mail invalide.";
+ 
+    // 2. Valider le format de l'identifiant
+    if (!empty($identifier)) {
+        $isLogin = preg_match("/^[a-zA-Z0-9]{4,}$/", $identifier);
+        $isEmail = preg_match("/^[^@\s]+@[^@\s]+\.[^@\s]+$/", $identifier);
+ 
+        if (!$isLogin && !$isEmail) {
+            $errors[] = "Identifiant invalide. Utilisez un login (lettres et chiffres, minimum 4 caractères) ou un email valide.";
+        }
     }
-
-    $passwordPattern = "/^(?=.*[A-Z])(?=.*[0-9]).{8,}$/";
-
-    if (!preg_match($passwordPattern, $password)) {
-        echo "Mot de passe invalide, veuillez en indiquer un avec minimum 8 caractères, 1 majuscule et 1 chiffre";
+ 
+    // 3. Valider le format du mot de passe
+    if (!empty($password) && !preg_match("/^(?=.*[A-Z])(?=.*[0-9]).{8,}$/", $password)) {
+        $errors[] = "Mot de passe invalide (minimum 8 caractères, 1 majuscule et 1 chiffre).";
     }
-
-    if ($password != $confirm_password) {
-        echo "Les mots de passe ne correspondent pas";
+ 
+    // 4. Si aucune erreur : enregistrer la session et rediriger
+    if (empty($errors)) {
+        $_SESSION['user'] = $identifier;
+        header("Location: index.php");
+        exit();
+    } else {
+        foreach ($errors as $error) {
+            echo $error . "<br>";
+        }
     }
-
-    echo "Inscription valide !";
+} else {
+    echo "Accès non autorisé.";
 }
 ?>
+ 

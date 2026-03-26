@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 if (isset($_POST["login"], $_POST["email"], $_POST["password"], $_POST["confirm_password"])) {
 
     $login = $_POST["login"];
