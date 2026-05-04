@@ -1,4 +1,5 @@
-session_start();
+<?php session_start();
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -22,13 +23,16 @@ session_start();
                     <li class="nav-item">
                         <a class="nav-link active" href="index.html">Accueil</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="register.html">Inscription</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="login.html">Connexion</a>
-                    </li>
-                </ul>
+                    <?php if (!isset($_SESSION['user'])) : ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="register.html">S'inscrire</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="login.html">Se connecter</a>
+                        </li>
+                    <?php endif; ?>
+                    </ul>
+                </div>
             </div>
         </div>
     </nav>
@@ -40,8 +44,16 @@ session_start();
                 Découvrez une sélection de jeux vidéo et créez votre compte pour accéder à votre futur espace personnel.
             </p>
             <div class="mt-4">
-                <a href="register.html" class="btn btn-primary me-2">S'inscrire</a>
-                <a href="login.html" class="btn btn-outline-dark">Se connecter</a>
+                <?php if (isset($_SESSION['user'])) : ?>
+                        <p>Bonjour <?php echo($_SESSION['user']); ?>!</p>
+                <?php else : ?>
+                    <li class="nav-item">
+                        <a href="register.html" class="btn btn-primary me-2">S'inscrire</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="login.html" class="btn btn-outline-dark">Se connecter</a>
+                    </li>
+                <?php endif; ?>
             </div>
         </div>
     </header>
