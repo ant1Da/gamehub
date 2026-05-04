@@ -1,5 +1,6 @@
 <?php
 session_start();
+require __DIR__ . '/db.php';  
  
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $identifier = $_POST['identifier'] ?? '';
@@ -32,9 +33,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
  
     // 4. Si aucune erreur : enregistrer la session et rediriger
     if (empty($errors)) {
-        $_SESSION['user'] = $identifier;
-        header("Location: index.php");
-        exit();
+        // Récupérer l'utilisateur en base par login ou email
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE login = ? OR email = ?");
+        $stmt->execute([$identifier, $identifier]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Vérifier le mot de passe
+        if ($user && password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['login']   = $user['login'];
+            header("Location: index.php");
+            exit();
+        } else {
+            echo "Identifiant ou mot de passe incorrect.";
+        }
     } else {
         foreach ($errors as $error) {
             echo $error . "<br>";

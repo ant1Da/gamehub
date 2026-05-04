@@ -1,6 +1,7 @@
 <?php
 session_start();
-include 'db.php';
+require __DIR__ . '/db.php';
+var_dump($pdo); // test temporaire
 
 if (isset($_POST["login"], $_POST["email"], $_POST["password"], $_POST["confirm_password"])) {
 
@@ -39,7 +40,8 @@ if (isset($_POST["login"], $_POST["email"], $_POST["password"], $_POST["confirm_
                 $stmt = $pdo->prepare("INSERT INTO users (login, email, password) VALUES (?, ?, ?)");
                 $stmt->execute([$login, $email, $hashedPassword]);
 
-                $_SESSION['user'] = $login;
+                $_SESSION['user_id'] = $pdo->lastInsertId();
+                $_SESSION['login']   = $login;
                 header("Location: index.php");
                 exit();
             }
