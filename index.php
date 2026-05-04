@@ -27,19 +27,25 @@ $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <li class="nav-item">
                             <a class="nav-link active" href="index.php">Accueil</a>
                         </li>
-                        <?php if (!isset($_SESSION['login'])) : ?>
+                        <?php if (isset($_SESSION['login'])) : ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="add_game.html">Ajouter un jeu</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="favorites.php">Mes jeux</a>
+                            </li>
+                            <li class="nav-item">
+                                <span class="nav-link">Bonjour <?php echo htmlspecialchars($_SESSION['login']); ?></span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-danger" href="logout.php">Se déconnecter</a>
+                            </li>
+                        <?php else : ?>
                             <li class="nav-item">
                                 <a class="nav-link" href="register.html">S'inscrire</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="login.html">Se connecter</a>
-                            </li>
-                        <?php else : ?>
-                            <li class="nav-item">
-                                <a class="nav-link" href="add_game.php">Ajouter un jeu</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-danger" href="logout.php">Se déconnecter</a>
                             </li>
                         <?php endif; ?>
                     </ul>
