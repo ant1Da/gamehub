@@ -94,6 +94,7 @@ $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     </div>
                                     <div class="card-footer d-flex justify-content-between align-items-center">
                                         <small class="text-muted">Genre : <?php echo htmlspecialchars($game['genre']); ?></small>
+                                        <a href="edit_game.php?id=<?php echo $game['id']; ?>" class="btn btn-sm btn-warning">Modifier</a>
                                     </div>
                                 </div>
                             </div>
