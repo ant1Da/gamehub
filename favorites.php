@@ -2,8 +2,15 @@
 session_start();
 require __DIR__ . '/db.php';
 
-// Récupérer tous les jeux
-$stmt = $pdo->query("SELECT * FROM games");
+// Vérifier que l'utilisateur est connecté
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.html");
+    exit();
+}
+
+// Récupérer uniquement les jeux de l'utilisateur connecté
+$stmt = $pdo->prepare("SELECT * FROM games WHERE user_id = ?");
+$stmt->execute([$_SESSION['user_id']]);
 $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -11,7 +18,7 @@ $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>GameHub - Accueil</title>
+        <title>GameHub - Mes jeux</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     </head>
     <body class="bg-dark text-light">
@@ -25,29 +32,17 @@ $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="collapse navbar-collapse" id="menuNavbar">
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link active" href="index.php">Accueil</a>
+                            <a class="nav-link" href="index.php">Accueil</a>
                         </li>
-                        <?php if (isset($_SESSION['login'])) : ?>
-                            <li class="nav-item">
-                                <a class="nav-link" href="add_game.html">Ajouter un jeu</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="favorites.php">Mes jeux</a>
-                            </li>
-                            <li class="nav-item">
-                                <span class="nav-link">Bonjour <?php echo htmlspecialchars($_SESSION['login']); ?></span>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-danger" href="logout.php">Se déconnecter</a>
-                            </li>
-                        <?php else : ?>
-                            <li class="nav-item">
-                                <a class="nav-link" href="register.html">S'inscrire</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="login.html">Se connecter</a>
-                            </li>
-                        <?php endif; ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="add_game.html">Ajouter un jeu</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="favorites.php">Mes jeux</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-danger" href="logout.php">Se déconnecter</a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -55,31 +50,40 @@ $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <header class="py-5 bg-secondary-subtle text-dark">
             <div class="container text-center">
-                <h1 class="display-4 fw-bold">Bienvenue sur GameHub</h1>
+                <h1 class="display-5 fw-bold">Mes jeux vidéo</h1>
                 <p class="lead mt-3">
-                    Découvrez une sélection de jeux vidéo et créez votre compte pour accéder à votre futur espace personnel.
+                    Cette page affiche uniquement les jeux enregistrés par l'utilisateur connecté.
                 </p>
-                <div class="mt-4">
-                    <?php if (isset($_SESSION['login'])) : ?>
-                        <p>Bonjour <?php echo htmlspecialchars($_SESSION['login']); ?> !</p>
-                        <a href="add_game.html" class="btn btn-primary">Ajouter un jeu</a>
-                    <?php else : ?>
-                        <a href="register.html" class="btn btn-primary me-2">S'inscrire</a>
-                        <a href="login.html" class="btn btn-outline-dark">Se connecter</a>
-                    <?php endif; ?>
-                </div>
             </div>
         </header>
 
         <main class="container py-5">
+
+            <section class="mb-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                    <div>
+                        <h2 class="mb-1">Liste de mes jeux</h2>
+                        <p class="text-light-emphasis mb-0">
+                            Vous retrouvez ici uniquement les jeux que vous avez ajoutés.
+                        </p>
+                    </div>
+                    <div>
+                        <a href="add_game.html" class="btn btn-primary">Ajouter un nouveau jeu</a>
+                    </div>
+                </div>
+            </section>
+
             <section>
-                <h2 class="mb-4">Jeux disponibles</h2>
                 <div class="row g-4">
                     <?php if (empty($games)) : ?>
-                        <p class="text-muted">Aucun jeu enregistré pour le moment.</p>
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                Vous n'avez encore enregistré aucun jeu.
+                            </div>
+                        </div>
                     <?php else : ?>
                         <?php foreach ($games as $game) : ?>
-                            <div class="col-md-6 col-lg-3">
+                            <div class="col-md-6 col-lg-4">
                                 <div class="card h-100 shadow-sm">
                                     <img src="images/<?php echo htmlspecialchars($game['image']); ?>"
                                          class="card-img-top"
@@ -88,8 +92,9 @@ $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <h5 class="card-title"><?php echo htmlspecialchars($game['title']); ?></h5>
                                         <p class="card-text"><?php echo htmlspecialchars($game['description']); ?></p>
                                     </div>
-                                    <div class="card-footer">
+                                    <div class="card-footer d-flex justify-content-between align-items-center">
                                         <small class="text-muted">Genre : <?php echo htmlspecialchars($game['genre']); ?></small>
+                                        <a href="edit_game.php?id=<?php echo $game['id']; ?>" class="btn btn-sm btn-warning">Modifier</a>
                                     </div>
                                 </div>
                             </div>
@@ -97,6 +102,7 @@ $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php endif; ?>
                 </div>
             </section>
+
         </main>
 
         <footer class="bg-black text-center py-3 border-top border-secondary">
